@@ -1,244 +1,346 @@
 #include <iostream>
 #include <array>
-#include <algorithm>
-#include <random>
+#include <algorithm> // shuffle, max
+#include <random>    // mt19937, seed_seq, random_device
 #include <cassert>
 
-enum class Rank
+// Maximum score before losing.
+constexpr int g_maximumScore{21};
+
+// Minimum score that the dealer has to have.
+constexpr int g_minimumDealerScore{17};
+
+class Card
 {
-    Ace,
-    two,
-    three,
-    four,
-    five,
-    six,
-    seven,
-    eight,
-    nine,
-    ten,
-    Jack,
-    Queen,
-    King,
-
-    max_ranks
-};
-
-enum class Suit
-{
-    club,
-    diamond,
-    heart,
-    spade,
-
-    max_suits
-};
-
-struct Card
-{
-    Rank rank{};
-    Suit suit{};
-};
-
-using Deck = std::array<Card, 52>;
-using CardIndex = Deck::size_type;
-
-constexpr int g_dealerMaxScore{17};
-constexpr int g_maxHandScore{21};
-
-void printCard(const Card &card)
-{
-
-    switch (card.rank)
+public:
+    enum Suit
     {
-    case Rank::Ace:
-        std::cout << 'A';
-        break;
-    case Rank::Jack:
-        std::cout << 'J';
-        break;
-    case Rank::Queen:
-        std::cout << 'Q';
-        break;
-    case Rank::King:
-        std::cout << 'K';
-        break;
-    default:
-        std::cout << static_cast<int>(card.rank) + 1;
-        break;
+        club,
+        diamond,
+        heart,
+        spade,
+
+        max_suits
+    };
+
+    enum Rank
+    {
+        rank_2,
+        rank_3,
+        rank_4,
+        rank_5,
+        rank_6,
+        rank_7,
+        rank_8,
+        rank_9,
+        rank_10,
+        rank_jack,
+        rank_queen,
+        rank_king,
+        rank_ace,
+
+        max_ranks
+    };
+
+private:
+    Rank m_rank{};
+    Suit m_suit{};
+
+public:
+    Card() = default;
+
+    Card(Rank rank, Suit suit)
+        : m_rank{rank}, m_suit{suit}
+    {
     }
 
-    switch (card.suit)
+    void print() const
     {
-    case Suit::club:
-        std::cout << 'C';
-        break;
-    case Suit::diamond:
-        std::cout << 'D';
-        break;
-    case Suit::heart:
-        std::cout << 'H';
-        break;
-    case Suit::spade:
-        std::cout << 'S';
-        break;
-    // required for max_suits
-    default:
-        assert(false && "impossible card suit");
-        break;
-    }
-}
-
-void printDeck(const Deck &deck)
-{
-    for (const auto &card : deck)
-    {
-        printCard(card);
-        std::cout << ' ';
-    }
-    std::cout << '\n';
-}
-
-Deck createDeck()
-{
-    Deck deck{};
-
-    CardIndex cardIndex{0};
-    for (int s{0}; s < static_cast<int>(Suit::max_suits); ++s)
-    {
-        for (int r{0}; r < static_cast<int>(Rank::max_ranks); ++r)
+        switch (m_rank)
         {
-            deck[cardIndex].rank = static_cast<Rank>(r);
-            deck[cardIndex].suit = static_cast<Suit>(s);
-            ++cardIndex;
-        }
-    }
-    return deck;
-}
-
-void shuffleDeck(Deck &deck)
-{
-    static std::random_device rd;
-    static std::seed_seq ss{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
-    static std::mt19937 mt{ss};
-
-    std::shuffle(deck.begin(), deck.end(), mt);
-}
-
-int getCardValue(const Card &card)
-{
-    switch (card.rank)
-    {
-    case Rank::Jack:
-    case Rank::Queen:
-    case Rank::King:
-        return 10;
-    case Rank::Ace:
-        return 11;
-    default:
-        return static_cast<int>(card.rank) + 1;
-    }
-}
-
-// draw the next card from a given deck, print what it is, then return it's value
-int drawCard(const Deck &deck, const bool reset = false)
-{
-    static CardIndex drawIndex{0};
-    if (reset)
-    {
-        drawIndex = 0;
-    }
-
-    Card newCard{deck[drawIndex++]};
-
-    printCard(newCard);
-
-    return getCardValue(newCard);
-}
-
-bool getPlayerAction()
-{
-    std::cout << "Enter hit or stand: ";
-    std::string choice{};
-    std::cin >> choice;
-
-    // TODO: input checking
-    return choice == "hit";
-}
-
-bool playBackjack(const Deck &deck)
-{
-
-    std::cout << "A new game of Blackjack has started!\n";
-
-    // The dealer gets one card to start
-    std::cout << "The dealer drew ";
-    int dealerScore{drawCard(deck)};
-    std::cout << '\n';
-
-    // The player gets two cards to start
-    std::cout << "You drew ";
-    int playerScore{drawCard(deck)};
-    std::cout << " and ";
-    playerScore += drawCard(deck);
-    std::cout << '\n';
-
-    // print starting scores
-    std::cout << "Starting dealer score: " << dealerScore << '\n';
-    std::cout << "Starting player score: " << playerScore << '\n';
-
-    // The player goes first
-    // A player can repeatedly “hit” or “stand”
-    // If the player “stands”, their turn is over, and their score is calculated based on the cards they have been dealt
-    // If the player “hits”, they get another card and the value of that card is added to their total score
-    while (playerScore < g_maxHandScore)
-    {
-        if (!getPlayerAction())
-        {
+        case rank_2:
+            std::cout << '2';
+            break;
+        case rank_3:
+            std::cout << '3';
+            break;
+        case rank_4:
+            std::cout << '4';
+            break;
+        case rank_5:
+            std::cout << '5';
+            break;
+        case rank_6:
+            std::cout << '6';
+            break;
+        case rank_7:
+            std::cout << '7';
+            break;
+        case rank_8:
+            std::cout << '8';
+            break;
+        case rank_9:
+            std::cout << '9';
+            break;
+        case rank_10:
+            std::cout << 'T';
+            break;
+        case rank_jack:
+            std::cout << 'J';
+            break;
+        case rank_queen:
+            std::cout << 'Q';
+            break;
+        case rank_king:
+            std::cout << 'K';
+            break;
+        case rank_ace:
+            std::cout << 'A';
+            break;
+        default:
+            std::cout << '?';
             break;
         }
-        std::cout << "You drew ";
-        playerScore += drawCard(deck);
-        std::cout << "\nYour score is " << playerScore << '\n';
+
+        switch (m_suit)
+        {
+        case club:
+            std::cout << 'C';
+            break;
+        case diamond:
+            std::cout << 'D';
+            break;
+        case heart:
+            std::cout << 'H';
+            break;
+        case spade:
+            std::cout << 'S';
+            break;
+        default:
+            std::cout << '?';
+            break;
+        }
     }
 
-    // If the player goes over a score of 21, they bust and lose immediately
-    if (playerScore >= g_maxHandScore)
+    int value() const
     {
+        switch (m_rank)
+        {
+        case rank_2:
+            return 2;
+        case rank_3:
+            return 3;
+        case rank_4:
+            return 4;
+        case rank_5:
+            return 5;
+        case rank_6:
+            return 6;
+        case rank_7:
+            return 7;
+        case rank_8:
+            return 8;
+        case rank_9:
+            return 9;
+        case rank_10:
+            return 10;
+        case rank_jack:
+            return 10;
+        case rank_queen:
+            return 10;
+        case rank_king:
+            return 10;
+        case rank_ace:
+            return 11;
+        default:
+            assert(false && "should never happen");
+            return 0;
+        }
+    }
+};
+
+class Deck
+{
+public:
+    using DeckType = std::array<Card, 52>;
+    using Index = DeckType::size_type;
+
+private:
+    DeckType m_deck{};
+    Index m_cardIndex{0};
+
+public:
+    Deck()
+    {
+        Index index{0};
+        for (int suit{0}; suit < static_cast<int>(Card::max_suits); ++suit)
+        {
+            for (int rank{0}; rank < static_cast<int>(Card::max_ranks); ++rank)
+            {
+                m_deck[index] = Card{static_cast<Card::Rank>(rank),
+                                     static_cast<Card::Suit>(suit)};
+                ++index;
+            }
+        }
+    }
+
+    void print() const
+    {
+        for (const auto &card : m_deck)
+        {
+            card.print();
+            std::cout << ' ';
+        }
+
+        std::cout << '\n';
+    }
+
+    void shuffle()
+    {
+        // create a rng using a seed comprised of 8 random_device calls
+        static std::random_device rd;
+        static std::seed_seq ss{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
+        static std::mt19937 mt{ss};
+        std::shuffle(m_deck.begin(), m_deck.end(), mt);
+        m_cardIndex = 0;
+    }
+
+    const Card &dealCard()
+    {
+        assert(m_cardIndex < m_deck.size() && "Ran out of cards to draw!");
+        return m_deck[m_cardIndex++];
+    }
+};
+
+class Player
+{
+private:
+    int m_score{0};
+
+public:
+    Player() = default;
+
+    const Card &drawCard(Deck &deck)
+    {
+        const Card &card{deck.dealCard()};
+        m_score += card.value();
+        return card;
+    }
+
+    int score() const
+    {
+        return m_score;
+    }
+
+    bool isBust() const
+    {
+        return m_score > g_maximumScore;
+    }
+};
+
+bool playerWantsHit()
+{
+    while (true)
+    {
+        std::cout << "(h) to hit, or (s) to stand: ";
+
+        char ch{};
+        std::cin >> ch;
+
+        switch (ch)
+        {
+        case 'h':
+            return true;
+        case 's':
+            return false;
+        }
+    }
+}
+
+// Returns true if the player went bust. False otherwise.
+bool playerTurn(Deck &deck, Player &player)
+{
+    while (true)
+    {
+        if (player.isBust())
+        {
+            // This can happen even before the player had a choice if they drew 2
+            // aces.
+            std::cout << "You busted!\n";
+            return true;
+        }
+
+        if (!playerWantsHit())
+        {
+            // The player didn't go bust and doesn't want to hit
+            return false;
+        }
+
+        // didn't bust, wants to hit
+        std::cout << "You draw a ";
+        player.drawCard(deck).print();
+        std::cout << '\n';
+        std::cout << "You now have " << player.score() << '\n';
+    }
+}
+
+// Returns true if the dealer went bust. False otherwise.
+bool dealerTurn(Deck &deck, Player &dealer, const Player &player)
+{
+    // Draw cards until we reach the minimum value or beat's the players score
+    while (dealer.score() < std::max(g_minimumDealerScore, player.score()))
+    {
+        std::cout << "The dealer draws a ";
+        dealer.drawCard(deck).print();
+        std::cout << '\n';
+        std::cout << "The dealer now has " << dealer.score() << '\n';
+
+        // If the dealer's score is too high, they went bust.
+        if (dealer.isBust())
+        {
+            std::cout << "The dealer busted!\n";
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool playBlackjack(Deck &deck)
+{
+    // Create the dealer and give them 1 card.
+    Player dealer{};
+    std::cout << "The dealer is showing: " << dealer.drawCard(deck).value() << '\n';
+
+    // Create the player and give them 2 cards.
+    Player player{};
+    std::cout << "You have: " << player.drawCard(deck).value() + player.drawCard(deck).value() << '\n';
+
+    if (playerTurn(deck, player))
+    {
+        // The player went bust, the dealer wins.
         return false;
     }
 
-    // The dealer goes after the player
-    // The dealer repeatedly draws until they reach a score of 17 or more, at which point they stand
-    while (dealerScore < g_dealerMaxScore && dealerScore < playerScore)
+    if (dealerTurn(deck, dealer, player))
     {
-        std::cout << "The dealer drew ";
-        dealerScore += drawCard(deck);
-        std::cout << "\nThe dealer's score is " << dealerScore << '\n';
+        // The dealer went bust, the player wins.
+        return true;
     }
 
-    // If the dealer goes over a score of 21, they bust and the player wins immediately
-    if (dealerScore >= g_maxHandScore)
-    {
-        return false;
-    }
-
-    // Otherwise, if the player has a higher score than the dealer, the player wins. Otherwise, the player loses
-    return playerScore > dealerScore;
+    return (player.score() > dealer.score());
 }
 
 int main()
 {
-    auto deck{createDeck()};
-    shuffleDeck(deck);
-
-    if (playBackjack(deck))
+    Deck deck{};
+    deck.shuffle();
+    if (playBlackjack(deck))
     {
-        std::cout << "You win!!!\n";
+        std::cout << "You win!\n";
     }
     else
     {
-        std::cout << "You lose :(\n";
+        std::cout << "You lose!\n";
     }
-
-    return 0;
 }
