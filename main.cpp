@@ -1,42 +1,14 @@
 #include "Card.h"
 #include "Deck.h"
+#include "Player.h"
+#include "Config.h"
 #include <iostream>
 #include <array>
 #include <algorithm> // shuffle, max
 #include <random>    // mt19937, seed_seq, random_device
 #include <cassert>
 
-// Maximum score before losing.
-constexpr int g_maximumScore{21};
 
-// Minimum score that the dealer has to have.
-constexpr int g_minimumDealerScore{17};
-
-class Player
-{
-private:
-    int m_score{0};
-
-public:
-    Player() = default;
-
-    const Card &drawCard(Deck &deck)
-    {
-        const Card &card{deck.dealCard()};
-        m_score += card.value();
-        return card;
-    }
-
-    int score() const
-    {
-        return m_score;
-    }
-
-    bool isBust() const
-    {
-        return m_score > g_maximumScore;
-    }
-};
 
 bool playerWantsHit()
 {
@@ -88,7 +60,7 @@ bool playerTurn(Deck &deck, Player &player)
 bool dealerTurn(Deck &deck, Player &dealer, const Player &player)
 {
     // Draw cards until we reach the minimum value or beat's the players score
-    while (dealer.score() < std::max(g_minimumDealerScore, player.score()))
+    while (dealer.score() < std::max(Config::minimumDealerScore, player.score()))
     {
         std::cout << "The dealer draws a ";
         dealer.drawCard(deck).print();
