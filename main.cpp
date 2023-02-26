@@ -1,14 +1,8 @@
-#include "Card.h"
 #include "Deck.h"
 #include "Player.h"
 #include "Config.h"
 #include <iostream>
-#include <array>
-#include <algorithm> // shuffle, max
-#include <random>    // mt19937, seed_seq, random_device
-#include <cassert>
-
-
+#include <algorithm> // max
 
 bool playerWantsHit()
 {
