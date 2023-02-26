@@ -1,4 +1,5 @@
 #include "Card.h"
+#include "Deck.h"
 #include <iostream>
 #include <array>
 #include <algorithm> // shuffle, max
@@ -10,59 +11,6 @@ constexpr int g_maximumScore{21};
 
 // Minimum score that the dealer has to have.
 constexpr int g_minimumDealerScore{17};
-
-class Deck
-{
-public:
-    using DeckType = std::array<Card, 52>;
-    using Index = DeckType::size_type;
-
-private:
-    DeckType m_deck{};
-    Index m_cardIndex{0};
-
-public:
-    Deck()
-    {
-        Index index{0};
-        for (int suit{0}; suit < static_cast<int>(Card::max_suits); ++suit)
-        {
-            for (int rank{0}; rank < static_cast<int>(Card::max_ranks); ++rank)
-            {
-                m_deck[index] = Card{static_cast<Card::Rank>(rank),
-                                     static_cast<Card::Suit>(suit)};
-                ++index;
-            }
-        }
-    }
-
-    void print() const
-    {
-        for (const auto &card : m_deck)
-        {
-            card.print();
-            std::cout << ' ';
-        }
-
-        std::cout << '\n';
-    }
-
-    void shuffle()
-    {
-        // create a rng using a seed comprised of 8 random_device calls
-        static std::random_device rd;
-        static std::seed_seq ss{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
-        static std::mt19937 mt{ss};
-        std::shuffle(m_deck.begin(), m_deck.end(), mt);
-        m_cardIndex = 0;
-    }
-
-    const Card &dealCard()
-    {
-        assert(m_cardIndex < m_deck.size() && "Ran out of cards to draw!");
-        return m_deck[m_cardIndex++];
-    }
-};
 
 class Player
 {
